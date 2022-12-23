@@ -11,3 +11,4 @@ secrets.json
 conf/application.conf
 .vscode/
 .metals/
+/.bloop
