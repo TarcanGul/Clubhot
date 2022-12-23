@@ -9,7 +9,7 @@ import play.api.mvc._
  * application's home page.
  */
 @Singleton
-class HomeController @Inject()(val controllerComponents: ControllerComponents) extends BaseController {
+class HomeController @Inject()(val controllerComponents: ControllerComponents, spotifyClient: SpotifyClient) extends BaseController {
 
   /**
    * Create an Action to render an HTML page.
@@ -19,6 +19,9 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
    * a path of `/`.
    */
   def index() = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.index())
+    if(!spotifyClient.AUTHENTICATED)
+      Redirect("/auth")
+
+    Ok(views.html.index(spotifyClient.getUserInfo()))
   }
 }
