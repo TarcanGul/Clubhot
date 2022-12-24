@@ -12,3 +12,4 @@ conf/application.conf
 .vscode/
 .metals/
 .bloop/
+/.bloop
