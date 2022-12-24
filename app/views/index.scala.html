@@ -1,6 +1,8 @@
-@(userInfo: String)
+@import play.api.libs.json.JsValue
+@(userInfo: String, playlists: JsValue)
 
 @main("Welcome to Play") {
   <h1>You are authenticated!</h1>
   <p>@userInfo</p>
+  <p>@playlists</p>
 }

@@ -19,9 +19,18 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, s
    * a path of `/`.
    */
   def index() = Action { implicit request: Request[AnyContent] =>
-    if(!spotifyClient.AUTHENTICATED)
+    if(request.session.isEmpty) {
       Redirect("/auth")
-
-    Ok(views.html.index(spotifyClient.getUserInfo()))
+    }
+    else {
+      request.session.data.foreach( p => println(s"${p._1} : ${p._2}"))
+      var spotifyAccessToken = request.session.get("access_token")
+      if(spotifyAccessToken.isDefined) {
+        val userInfo = spotifyClient.getUserInfo(spotifyAccessToken.get)
+        val playlists = spotifyClient.getCurrentPlaylists(spotifyAccessToken.get)
+        Ok(views.html.index(userInfo, playlists))
+      } else
+        NotFound("Token doesn't exist")
+    }
   }
 }
