@@ -1,8 +1,24 @@
 @import play.api.libs.json.JsValue
-@(userInfo: String, playlists: JsValue)
+@(userInfo: String, title: String, playlists: JsValue)
 
-@main("Welcome to Play") {
-  <h1>You are authenticated!</h1>
-  <p>@userInfo</p>
-  <p>@playlists</p>
+@main("Clubhot") {
+  <html>
+    <head>
+        <!-- Include Bootstrap CSS file -->
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+      <title>@title</title>
+    </head>
+    <body>
+        <!-- Add a container and a row, then add a section and button inside the row -->
+      <div class="container">
+        <div class="row">
+          <section class="col-md-12">
+            @userInfo
+            @playlists
+          </section>
+          <button class="btn btn-primary col-md-12">Click me!</button>
+        </div>
+      </div>
+    </body>
+  </html>
 }

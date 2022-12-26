@@ -1,0 +1,92 @@
+package models
+
+import com.typesafe.config.ConfigFactory
+import play.api.libs.json.JsValue
+import play.api.libs.ws._
+
+import java.util.Base64
+import javax.inject._
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.language.postfixOps
+
+class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) {
+  val clientID = ConfigFactory.load().getString("spotify.api.clientid")
+  val clientSecret = ConfigFactory.load().getString("spotify.api.secret")
+  val baseURI = "https://api.spotify.com/v1"
+  val accountURI = "https://accounts.spotify.com"
+  val callbackURI = "http://localhost:9000/oauth2/callback"
+
+  def authenticate: String  = {
+    val authReq : WSRequest = ws.url(accountURI + "/authorize")
+    .addQueryStringParameters("client_id" -> clientID)
+    .addQueryStringParameters("response_type" -> "code")
+    .addQueryStringParameters("redirect_uri" -> callbackURI)
+
+    authReq.uri.toString
+  }
+
+  def getToken(code: String) : Future[WSResponse] = {
+    val tokenReq : WSRequest = ws.url(accountURI + "/api/token")
+      .addHttpHeaders("Authorization" ->  s"Basic ${Base64.getEncoder.encodeToString((clientID + ':' + clientSecret).getBytes)}")
+      .addHttpHeaders("Content-Type" -> "application/x-www-form-urlencoded")
+    tokenReq.post(Map("code" -> code, "grant_type" -> "authorization_code", "redirect_uri" -> callbackURI))
+  }
+
+  //TODO: implement
+  def getNewAccessToken(refreshToken: String): Future[String] = {
+    val req : WSRequest = ws.url(accountURI + "/api/token")
+      .addHttpHeaders("Authorization" ->  s"Basic ${Base64.getEncoder.encodeToString((clientID + ':' + clientSecret).getBytes)}")
+      .addHttpHeaders("Content-Type" -> "application/x-www-form-urlencoded")
+    req.post(Map("grant_type" -> "refresh_token", "refresh_token" -> refreshToken)).map {
+      r => {
+        r.status match {
+          case 200 => (r.json \ "access_token").as[String]
+        }
+      }
+    }
+  }
+
+  private def generateSpotifyRequest(path: String, token: String) : WSRequest =
+    ws.url(baseURI + path)
+      .addHttpHeaders("Authorization" -> s"Bearer ${token}")
+      .addHttpHeaders("Content-Type"-> "application/json")
+
+  //can you implement this without getting tokens as parameter?
+  def getUserInfo(token: String, refreshToken: String) : Future[String]  = {
+    val req : WSRequest = generateSpotifyRequest("/me", token)
+    req.get().flatMap {
+      r => {
+        r.status match {
+          case 200 => Future.successful(r.body(readableAsString))
+          case 401 => {
+            getNewAccessToken(refreshToken).flatMap {
+              newToken => getUserInfo(newToken, refreshToken)
+            }
+          }
+          case _ => Future.successful(r.body)
+        }
+      }
+    }
+    }
+
+  def getCurrentPlaylists(token: String, refreshToken: String) : Future[JsValue] = {
+    val req : WSRequest = generateSpotifyRequest("/me/playlists", token)
+    req.get().flatMap {
+      r => {
+        r.status match {
+          case 200 => Future.successful(r.body(readableAsJson))
+          case 401 => {
+            getNewAccessToken(refreshToken).flatMap {
+              newToken => getCurrentPlaylists(newToken, refreshToken)
+            }
+          }
+          case _ => Future.successful(r.body(readableAsJson))
+        }
+      }
+    }
+  }
+
+
+}
+
