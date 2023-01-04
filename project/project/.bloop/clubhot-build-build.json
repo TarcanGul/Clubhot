@@ -198,7 +198,7 @@
         "platform": {
             "name": "jvm",
             "config": {
-                "home": "/Library/Java/JavaVirtualMachines/temurin-16.jdk/Contents/Home",
+                "home": "/Users/tarcan.gul/Desktop/java_setup/openjdk_11.0.9_11.43.54_x64/zulu-11.jdk/Contents/Home",
                 "options": [
                     "-Duser.dir=/Users/tarcan.gul/other_projects/clubhot/project/project"
                 ]

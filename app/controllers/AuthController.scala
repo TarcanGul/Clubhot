@@ -1,6 +1,7 @@
 package controllers
 
-import models.SpotifyClient
+import models.SpotifyClientTrait
+import models.EncryptorService
 import play.api.mvc.{AnyContent, BaseController, ControllerComponents, Cookie, Request, Result}
 
 import javax.inject.{Inject, Singleton}
@@ -11,7 +12,7 @@ import scala.concurrent.ExecutionContext
  * application's home page.
  */
 @Singleton
-class AuthController @Inject()(val controllerComponents: ControllerComponents, spotifyClient: SpotifyClient)(implicit ec: ExecutionContext) extends BaseController {
+class AuthController @Inject()(val controllerComponents: ControllerComponents, spotifyClient: SpotifyClientTrait, enc: EncryptorService)(implicit ec: ExecutionContext) extends BaseController {
 
   /**
    Route: /oauth2/callback
@@ -23,7 +24,7 @@ class AuthController @Inject()(val controllerComponents: ControllerComponents, s
       val accessToken = (response.json \ "access_token").as[String]
       val refreshToken = (response.json \ "refresh_token").as[String]
 
-      Redirect("/").withSession(("access_token" -> accessToken), ("refresh_token" -> refreshToken))
+      Redirect("/").withSession(("access_token" -> enc.encrypt(accessToken)), ("refresh_token" -> enc.encrypt(refreshToken)))
     }
     }
   }

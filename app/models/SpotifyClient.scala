@@ -1,16 +1,14 @@
 package models
 
-import com.typesafe.config.ConfigFactory
 import play.api.libs.json.JsValue
 import play.api.libs.ws._
 
-import java.util.Base64
-import javax.crypto.Cipher
-import javax.crypto.spec.SecretKeySpec
 import javax.inject._
 import play.api.mvc.Cookies
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
+import com.typesafe.config.ConfigFactory
+import java.util.Base64
 
 class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) extends SpotifyClientTrait {
   val clientID = ConfigFactory.load().getString("spotify.api.clientid")
@@ -22,14 +20,12 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) exten
   var accessToken: String = ""
   var refreshToken: String = ""
 
-  def authenticate: String  = {
-    val authReq : WSRequest = ws.url(accountURI + "/authorize")
+  val authenticateURL: String = 
+    ws.url(accountURI + "/authorize")
     .addQueryStringParameters("client_id" -> clientID)
     .addQueryStringParameters("response_type" -> "code")
     .addQueryStringParameters("redirect_uri" -> callbackURI)
-
-    authReq.uri.toString
-  }
+    .uri.toString()
 
   def setTokens(aToken: String, rToken: String) : Unit = {
     accessToken = aToken
@@ -43,8 +39,7 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) exten
     tokenReq.post(Map("code" -> code, "grant_type" -> "authorization_code", "redirect_uri" -> callbackURI))
   }
 
-  //TODO: implement
-  def getNewAccessToken(): Future[String] = {
+  private def getNewAccessToken(): Future[String] = {
     val req : WSRequest = ws.url(accountURI + "/api/token")
       .addHttpHeaders("Authorization" ->  s"Basic ${Base64.getEncoder.encodeToString((clientID + ':' + clientSecret).getBytes)}")
       .addHttpHeaders("Content-Type" -> "application/x-www-form-urlencoded")
@@ -96,22 +91,5 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) exten
       }
     }
   }
-
-  /*def encrypt(plaintext: String): String = {
-    val encryptionKeyBytes = ConfigFactory.load().getString("token.encryption.key").getBytes()
-    val secretKey = new SecretKeySpec(encryptionKeyBytes, "AES")
-    val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
-    cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-    new String(cipher.doFinal(plaintext.getBytes("UTF-8")))
-  }
-
-  def decrypt(ciphertext: String): String = {
-    val encryptionKeyBytes = ConfigFactory.load().getString("token.encryption.key").getBytes()
-    val secretKey = new SecretKeySpec(encryptionKeyBytes, "AES")
-    val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
-    cipher.init(Cipher.DECRYPT_MODE, secretKey)
-    new String(Base64.getDecoder.decode(cipher.doFinal(ciphertext.getBytes("UTF-8"))))
-  }*/
-
 }
 

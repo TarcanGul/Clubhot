@@ -1,7 +1,7 @@
 package controllers
 
 import models.SpotifyClient
-
+import models.EncryptorService
 import javax.inject._
 import play.api.mvc._
 
@@ -14,7 +14,7 @@ import models.SpotifyClientTrait
  * application's home page.
  */
 @Singleton
-class HomeController @Inject()(val controllerComponents: ControllerComponents, sc: SpotifyClient)(implicit ec: ExecutionContext) extends BaseController {
+class HomeController @Inject()(val controllerComponents: ControllerComponents, val sc: SpotifyClientTrait, enc: EncryptorService)(implicit ec: ExecutionContext) extends BaseController {
 
   /**
    * Create an Action to render an HTML page.
@@ -32,11 +32,10 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, s
     println(spotifyAccessToken.isEmpty && spotifyRefToken.isEmpty)
 
     if (spotifyAccessToken.isEmpty && spotifyRefToken.isEmpty) {
-      println("need to auth")
-      Future.successful(Redirect(sc.authenticate))
+      Future.successful(Redirect(sc.authenticateURL))
     }
     else {
-      sc.setTokens(spotifyAccessToken.get, spotifyRefToken.get)
+      sc.setTokens(enc.decrypt(spotifyAccessToken.get), enc.decrypt(spotifyRefToken.get))
       for {
         userInfo <- sc.getUserInfo()
         currentPlaylists <- sc.getCurrentPlaylists()
