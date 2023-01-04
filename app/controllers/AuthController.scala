@@ -19,7 +19,6 @@ class AuthController @Inject()(val controllerComponents: ControllerComponents, s
    */
   def callback() = Action.async {implicit request: Request[AnyContent] =>
     val authCode = request.getQueryString("code")
-    println("callback called")
     spotifyClient.getToken(authCode.get).map { response => {
       val accessToken = (response.json \ "access_token").as[String]
       val refreshToken = (response.json \ "refresh_token").as[String]

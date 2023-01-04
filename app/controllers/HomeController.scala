@@ -1,7 +1,7 @@
 package controllers
 
-import models.SpotifyClient
 import models.EncryptorService
+import models.BeatportClientTrait
 import javax.inject._
 import play.api.mvc._
 
@@ -14,7 +14,7 @@ import models.SpotifyClientTrait
  * application's home page.
  */
 @Singleton
-class HomeController @Inject()(val controllerComponents: ControllerComponents, val sc: SpotifyClientTrait, enc: EncryptorService)(implicit ec: ExecutionContext) extends BaseController {
+class HomeController @Inject()(val controllerComponents: ControllerComponents, val sc: SpotifyClientTrait, val bc: BeatportClientTrait, enc: EncryptorService)(implicit ec: ExecutionContext) extends BaseController {
 
   /**
    * Create an Action to render an HTML page.
@@ -29,17 +29,18 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, v
   def index() = Action.async { implicit request: Request[AnyContent] =>
     val spotifyAccessToken = request.session.get("access_token")
     val spotifyRefToken = request.session.get("refresh_token")
-    println(spotifyAccessToken.isEmpty && spotifyRefToken.isEmpty)
+    
 
     if (spotifyAccessToken.isEmpty && spotifyRefToken.isEmpty) {
       Future.successful(Redirect(sc.authenticateURL))
     }
-    else {
+    else {   
       sc.setTokens(enc.decrypt(spotifyAccessToken.get), enc.decrypt(spotifyRefToken.get))
       for {
         userInfo <- sc.getUserInfo()
         currentPlaylists <- sc.getCurrentPlaylists()
-      } yield Ok(views.html.index(userInfo, APP_TITLE, currentPlaylists))
+        top100 <- bc.getTop100()
+      } yield Ok(views.html.index(userInfo, APP_TITLE, currentPlaylists, top100))
     }
   }
 }

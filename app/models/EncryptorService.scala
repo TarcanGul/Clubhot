@@ -18,7 +18,6 @@ class EncryptorService {
     }
 
     def decrypt(ciphertext: String): String = {
-        println(s"cipher: ${ciphertext}")
         val encryptionKeyBytes = ConfigFactory.load().getString("token.encryption.key").getBytes("UTF-8")
         val secretKey = new SecretKeySpec(encryptionKeyBytes, "AES")
         val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")

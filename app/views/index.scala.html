@@ -1,5 +1,5 @@
 @import play.api.libs.json.JsValue
-@(userInfo: String, title: String, playlists: JsValue)
+@(userInfo: String, title: String, playlists: JsValue, top100: List[(String, String)]) 
 
 @main("Clubhot") {
   <html>
@@ -15,6 +15,10 @@
           <section class="col-md-12 main-section">
             @userInfo
             @playlists
+
+            @for(values <- top100) {
+              <li>@values._1 @values._2</li>
+            }
           </section>
           <button class="btn btn-primary col-md-12" id="playlist">Click me!</button>
         </div>
