@@ -2,6 +2,8 @@
 
 *Goal*: Get the features of Top 100 Beatport songs using spotify api and display in Web UI.
 
+Decided to seperate token and spotify service.
+
 *Steps*:
 - Authorize to Spotify account
 - Put user info to the screen with button under it

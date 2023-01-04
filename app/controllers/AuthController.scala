@@ -22,12 +22,9 @@ class AuthController @Inject()(val controllerComponents: ControllerComponents, s
     spotifyClient.getToken(authCode.get).map { response => {
       val accessToken = (response.json \ "access_token").as[String]
       val refreshToken = (response.json \ "refresh_token").as[String]
-      //Write these values encrypted in a cookie.
-      val accessTokenCookie = Cookie("access_token_clubhot", spotifyClient.encrypt(accessToken), maxAge = Some(3600))
-      val refreshTokenCookie = Cookie("refresh_token_clubhot", spotifyClient.encrypt(refreshToken), maxAge = Some(3600))
-      Redirect("/").withCookies(accessTokenCookie, refreshTokenCookie)
-    }
 
+      Redirect("/").withSession(("access_token" -> accessToken), ("refresh_token" -> refreshToken))
+    }
     }
   }
 }

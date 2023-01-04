@@ -12,18 +12,15 @@ import play.api.mvc.Cookies
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
 
-class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) {
+class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) extends SpotifyClientTrait {
   val clientID = ConfigFactory.load().getString("spotify.api.clientid")
   val clientSecret = ConfigFactory.load().getString("spotify.api.secret")
   val baseURI = "https://api.spotify.com/v1"
   val accountURI = "https://accounts.spotify.com"
   val callbackURI = "http://localhost:9000/oauth2/callback"
 
-  val encryptionKeyBytes = ConfigFactory.load().getString("token.encryption.key").getBytes()
-  val secretKey = new SecretKeySpec(encryptionKeyBytes, "AES")
-
-  var accessToken = ""
-  var refToken = ""
+  var accessToken: String = ""
+  var refreshToken: String = ""
 
   def authenticate: String  = {
     val authReq : WSRequest = ws.url(accountURI + "/authorize")
@@ -34,6 +31,10 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) {
     authReq.uri.toString
   }
 
+  def setTokens(aToken: String, rToken: String) : Unit = {
+    accessToken = aToken
+    refreshToken = rToken
+  }
 
   def getToken(code: String) : Future[WSResponse] = {
     val tokenReq : WSRequest = ws.url(accountURI + "/api/token")
@@ -47,7 +48,7 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) {
     val req : WSRequest = ws.url(accountURI + "/api/token")
       .addHttpHeaders("Authorization" ->  s"Basic ${Base64.getEncoder.encodeToString((clientID + ':' + clientSecret).getBytes)}")
       .addHttpHeaders("Content-Type" -> "application/x-www-form-urlencoded")
-    req.post(Map("grant_type" -> "refresh_token", "refresh_token" -> decrypt(refToken))).map {
+    req.post(Map("grant_type" -> "refresh_token", "refresh_token" -> refreshToken)).map {
       r => {
         r.status match {
           case 200 => (r.json \ "access_token").as[String]
@@ -58,7 +59,7 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) {
 
   private def generateSpotifyRequest(path: String) : WSRequest =
     ws.url(baseURI + path)
-      .addHttpHeaders("Authorization" -> s"Bearer ${decrypt(accessToken)}")
+      .addHttpHeaders("Authorization" -> s"Bearer ${accessToken}")
       .addHttpHeaders("Content-Type"-> "application/json")
 
   //can you implement this without getting tokens as parameter?
@@ -96,17 +97,21 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) {
     }
   }
 
-  def encrypt(plaintext: String): String = {
+  /*def encrypt(plaintext: String): String = {
+    val encryptionKeyBytes = ConfigFactory.load().getString("token.encryption.key").getBytes()
+    val secretKey = new SecretKeySpec(encryptionKeyBytes, "AES")
     val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
     cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-    cipher.doFinal(plaintext.getBytes).toString
+    new String(cipher.doFinal(plaintext.getBytes("UTF-8")))
   }
 
   def decrypt(ciphertext: String): String = {
+    val encryptionKeyBytes = ConfigFactory.load().getString("token.encryption.key").getBytes()
+    val secretKey = new SecretKeySpec(encryptionKeyBytes, "AES")
     val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
     cipher.init(Cipher.DECRYPT_MODE, secretKey)
-    new String(cipher.doFinal(ciphertext.getBytes))
-  }
+    new String(Base64.getDecoder.decode(cipher.doFinal(ciphertext.getBytes("UTF-8"))))
+  }*/
 
 }
 

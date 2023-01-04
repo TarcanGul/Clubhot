@@ -7,13 +7,14 @@ import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
+import models.SpotifyClientTrait
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
  * application's home page.
  */
 @Singleton
-class HomeController @Inject()(val controllerComponents: ControllerComponents, spotifyClient: SpotifyClient)(implicit ec: ExecutionContext) extends BaseController {
+class HomeController @Inject()(val controllerComponents: ControllerComponents, sc: SpotifyClient)(implicit ec: ExecutionContext) extends BaseController {
 
   /**
    * Create an Action to render an HTML page.
@@ -26,24 +27,20 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, s
   val APP_TITLE = "ClubHot"
 
   def index() = Action.async { implicit request: Request[AnyContent] =>
-    val spotifyAccessToken = request.cookies.get("access_token_clubhot")
-    val spotifyRefToken = request.cookies.get("refresh_token_clubhot")
-
+    val spotifyAccessToken = request.session.get("access_token")
+    val spotifyRefToken = request.session.get("refresh_token")
     println(spotifyAccessToken.isEmpty && spotifyRefToken.isEmpty)
 
     if (spotifyAccessToken.isEmpty && spotifyRefToken.isEmpty) {
       println("need to auth")
-      Future.successful(Redirect(spotifyClient.authenticate))
+      Future.successful(Redirect(sc.authenticate))
     }
     else {
-      val userInfo = spotifyClient.getUserInfo()
-      userInfo.flatMap {
-        userInfo => {
-          spotifyClient.getCurrentPlaylists().flatMap {
-            currentPlaylists => Future.successful(Ok(views.html.index(userInfo, APP_TITLE, currentPlaylists)))
-          }
-        }
-      }(ec)
+      sc.setTokens(spotifyAccessToken.get, spotifyRefToken.get)
+      for {
+        userInfo <- sc.getUserInfo()
+        currentPlaylists <- sc.getCurrentPlaylists()
+      } yield Ok(views.html.index(userInfo, APP_TITLE, currentPlaylists))
     }
   }
 }

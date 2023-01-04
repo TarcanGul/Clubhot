@@ -18,12 +18,12 @@
         "classpath": [
             "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/org/scala-sbt/sbt/1.7.2/sbt-1.7.2.jar",
             "/Users/tarcan.gul/.sbt/boot/scala-2.12.16/lib/scala-library.jar",
-            "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/sbt-bloop_2.12_1.0/1.5.4/sbt-bloop-1.5.4.jar",
+            "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/sbt-bloop_2.12_1.0/1.5.6/sbt-bloop-1.5.6.jar",
             "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/com/typesafe/play/sbt-plugin_2.12_1.0/2.8.18/sbt-plugin-2.8.18.jar",
             "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo.scala-sbt.org/scalasbt/sbt-plugin-releases/org.foundweekends.giter8/sbt-giter8-scaffold/scala_2.12/sbt_1.0/0.13.1/jars/sbt-giter8-scaffold.jar",
             "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/org/scala-sbt/main_2.12/1.7.2/main_2.12-1.7.2.jar",
             "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/org/scala-sbt/io_2.12/1.7.0/io_2.12-1.7.0.jar",
-            "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/bloop-config_2.12/1.5.4/bloop-config_2.12-1.5.4.jar",
+            "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/bloop-config_2.12/1.5.5/bloop-config_2.12-1.5.5.jar",
             "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/com/typesafe/play/sbt-routes-compiler_2.12/2.8.18/sbt-routes-compiler_2.12-2.8.18.jar",
             "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/com/typesafe/play/run-support_2.12/2.8.18/run-support_2.12-2.8.18.jar",
             "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/com/typesafe/config/1.4.2/config-1.4.2.jar",
@@ -285,7 +285,7 @@
         "platform": {
             "name": "jvm",
             "config": {
-                "home": "/Users/tarcan.gul/Desktop/java_setup/openjdk_11.0.9_11.43.54_x64/zulu-11.jdk/Contents/Home",
+                "home": "/Library/Java/JavaVirtualMachines/temurin-16.jdk/Contents/Home",
                 "options": [
                     "-Duser.dir=/Users/tarcan.gul/other_projects/clubhot/project"
                 ]
@@ -299,17 +299,17 @@
                 {
                     "organization": "ch.epfl.scala",
                     "name": "sbt-bloop",
-                    "version": "1.5.4",
+                    "version": "1.5.6",
                     "configurations": "default",
                     "artifacts": [
                         {
                             "name": "sbt-bloop",
-                            "path": "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/sbt-bloop_2.12_1.0/1.5.4/sbt-bloop-1.5.4.jar"
+                            "path": "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/sbt-bloop_2.12_1.0/1.5.6/sbt-bloop-1.5.6.jar"
                         },
                         {
                             "name": "sbt-bloop",
                             "classifier": "sources",
-                            "path": "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/sbt-bloop_2.12_1.0/1.5.4/sbt-bloop-1.5.4-sources.jar"
+                            "path": "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/sbt-bloop_2.12_1.0/1.5.6/sbt-bloop-1.5.6-sources.jar"
                         }
                     ]
                 },
@@ -359,17 +359,17 @@
                 {
                     "organization": "ch.epfl.scala",
                     "name": "bloop-config_2.12",
-                    "version": "1.5.4",
+                    "version": "1.5.5",
                     "configurations": "default",
                     "artifacts": [
                         {
                             "name": "bloop-config_2.12",
-                            "path": "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/bloop-config_2.12/1.5.4/bloop-config_2.12-1.5.4.jar"
+                            "path": "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/bloop-config_2.12/1.5.5/bloop-config_2.12-1.5.5.jar"
                         },
                         {
                             "name": "bloop-config_2.12",
                             "classifier": "sources",
-                            "path": "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/bloop-config_2.12/1.5.4/bloop-config_2.12-1.5.4-sources.jar"
+                            "path": "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/bloop-config_2.12/1.5.5/bloop-config_2.12-1.5.5-sources.jar"
                         }
                     ]
                 },
@@ -592,23 +592,6 @@
                     ]
                 },
                 {
-                    "organization": "org.scala-lang",
-                    "name": "scala-library",
-                    "version": "2.12.16",
-                    "configurations": "default",
-                    "artifacts": [
-                        {
-                            "name": "scala-library",
-                            "path": "/Users/tarcan.gul/.sbt/boot/scala-2.12.16/lib/scala-library.jar"
-                        },
-                        {
-                            "name": "scala-library",
-                            "classifier": "sources",
-                            "path": "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.12.16/scala-library-2.12.16-sources.jar"
-                        }
-                    ]
-                },
-                {
                     "organization": "com.github.plokhotnyuk.jsoniter-scala",
                     "name": "jsoniter-scala-core_2.12",
                     "version": "2.4.0",
@@ -622,6 +605,23 @@
                             "name": "jsoniter-scala-core_2.12",
                             "classifier": "sources",
                             "path": "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/com/github/plokhotnyuk/jsoniter-scala/jsoniter-scala-core_2.12/2.4.0/jsoniter-scala-core_2.12-2.4.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scala-lang",
+                    "name": "scala-library",
+                    "version": "2.12.16",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "scala-library",
+                            "path": "/Users/tarcan.gul/.sbt/boot/scala-2.12.16/lib/scala-library.jar"
+                        },
+                        {
+                            "name": "scala-library",
+                            "classifier": "sources",
+                            "path": "/Users/tarcan.gul/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.12.16/scala-library-2.12.16-sources.jar"
                         }
                     ]
                 },
