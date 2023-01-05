@@ -57,7 +57,6 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) exten
       .addHttpHeaders("Authorization" -> s"Bearer ${accessToken}")
       .addHttpHeaders("Content-Type"-> "application/json")
 
-  //can you implement this without getting tokens as parameter?
   def getUserInfo() : Future[String]  = {
     val req : WSRequest = generateSpotifyRequest("/me")
     req.get().flatMap {
@@ -84,6 +83,27 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) exten
           case 401 => {
             getNewAccessToken().flatMap {
               newToken => getCurrentPlaylists()
+            }
+          }
+          case _ => Future.successful(r.body(readableAsJson))
+        }
+      }
+    }
+  }
+
+  def searchTrack(query: String) : Future[JsValue] = {
+    val req : WSRequest = generateSpotifyRequest("/search")
+      .addQueryStringParameters("query" -> query)
+      .addQueryStringParameters("type" -> "track")
+      .addQueryStringParameters("limit" -> "3")
+    
+    req.get().flatMap {
+      r => {
+        r.status match {
+          case 200 => Future.successful((r.body(readableAsJson) \ "tracks" \ "items").get.as[List[JsValue]].head)
+          case 401 => {
+            getNewAccessToken().flatMap {
+              newToken => searchTrack(query)
             }
           }
           case _ => Future.successful(r.body(readableAsJson))

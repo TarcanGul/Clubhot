@@ -4,6 +4,7 @@ import models.EncryptorService
 import models.BeatportClientTrait
 import javax.inject._
 import play.api.mvc._
+import play.api.libs.json._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -30,17 +31,16 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, v
     val spotifyAccessToken = request.session.get("access_token")
     val spotifyRefToken = request.session.get("refresh_token")
     
-
     if (spotifyAccessToken.isEmpty && spotifyRefToken.isEmpty) {
       Future.successful(Redirect(sc.authenticateURL))
     }
     else {   
       sc.setTokens(enc.decrypt(spotifyAccessToken.get), enc.decrypt(spotifyRefToken.get))
       for {
-        userInfo <- sc.getUserInfo()
-        currentPlaylists <- sc.getCurrentPlaylists()
-        top100 <- bc.getTop100()
-      } yield Ok(views.html.index(userInfo, APP_TITLE, currentPlaylists, top100))
+        userInfo : String <- sc.getUserInfo()
+        top100 : List[(String, String)] <- bc.getTop100()
+        top100Spotify : List[JsValue] <- Future.sequence(top100.map (track => sc.searchTrack(s"${track._1} ${track._2}").map {value => (value \ "album" \ "external_urls" \ "spotify").getOrElse(Json.toJson("Exclusive"))}))
+      } yield Ok(views.html.index(userInfo, APP_TITLE, top100Spotify))
     }
   }
 }

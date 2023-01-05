@@ -23,4 +23,6 @@ trait SpotifyClientTrait {
   def getUserInfo() : Future[String]
 
   def getCurrentPlaylists() : Future[JsValue]
+
+  def searchTrack(query: String) : Future[JsValue]
 }
