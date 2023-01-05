@@ -39,7 +39,7 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, v
       for {
         userInfo : String <- sc.getUserInfo()
         top100 : List[(String, String)] <- bc.getTop100()
-        top100Spotify : List[JsValue] <- Future.sequence(top100.map (track => sc.searchTrack(s"${track._1} ${track._2}").map {value => (value \ "album" \ "external_urls" \ "spotify").getOrElse(Json.toJson("Exclusive"))}))
+        top100Spotify : List[JsValue] <- Future.sequence(top100.map (track => sc.searchTrack(s"\"${track._1}\" ${track._2}").map {track => (track \ "tracks" \ "items").as[List[JsValue]].head("external_urls")("spotify")}))
       } yield Ok(views.html.index(userInfo, APP_TITLE, top100Spotify))
     }
   }

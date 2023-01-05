@@ -95,12 +95,12 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) exten
     val req : WSRequest = generateSpotifyRequest("/search")
       .addQueryStringParameters("query" -> query)
       .addQueryStringParameters("type" -> "track")
-      .addQueryStringParameters("limit" -> "3")
+      .addQueryStringParameters("limit" -> "1")
     
     req.get().flatMap {
       r => {
         r.status match {
-          case 200 => Future.successful((r.body(readableAsJson) \ "tracks" \ "items").get.as[List[JsValue]].head)
+          case 200 => Future.successful((r.body(readableAsJson)))
           case 401 => {
             getNewAccessToken().flatMap {
               newToken => searchTrack(query)
