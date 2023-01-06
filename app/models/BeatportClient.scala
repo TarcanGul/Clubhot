@@ -20,6 +20,4 @@ class BeatportClient @Inject()(implicit ec: ExecutionContext) extends BeatportCl
         tracks.map(element => (element.select(".buk-track-title").head.text, element.select(".buk-track-artists").head.text))
     } 
   }
-
-  
 }

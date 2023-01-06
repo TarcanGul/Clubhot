@@ -9,6 +9,7 @@ import play.api.libs.json._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 import models.SpotifyClientTrait
+import scala.concurrent.blocking
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -26,6 +27,9 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, v
    */
 
   val APP_TITLE = "ClubHot"
+  val RATE_LIMIT = 10
+  val PLAYLIST_NAME = "Beatport Top 100!"
+  val PLAYLIST_DESC = "Automatically updated playlist."
 
   def index() = Action.async { implicit request: Request[AnyContent] =>
     val spotifyAccessToken = request.session.get("access_token")
@@ -36,11 +40,25 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, v
     }
     else {   
       sc.setTokens(enc.decrypt(spotifyAccessToken.get), enc.decrypt(spotifyRefToken.get))
-      for {
-        userInfo : String <- sc.getUserInfo()
-        top100 : List[(String, String)] <- bc.getTop100()
-        top100Spotify : List[JsValue] <- Future.sequence(top100.map (track => sc.searchTrack(s"\"${track._1}\" ${track._2}").map {track => (track \ "tracks" \ "items").as[List[JsValue]].head("external_urls")("spotify")}))
-      } yield Ok(views.html.index(userInfo, APP_TITLE, top100Spotify))
+
+      sc.getUserInfo().flatMap {
+        userInfo => {
+          val userId = (userInfo \ "id").get.as[String]
+          println(userId)
+          for {
+            top100 : List[(String, String)] <- bc.getTop100()
+            top100Spotify : List[JsValue] <- Future.sequence(top100.map 
+              (track =>
+                blocking {
+                  sc.searchTrack(s"\"${track._1}\" \"${track._2}\"").map{optionValue => optionValue.getOrElse(Json.parse("""{"external_urls" : { "spotify" : "No song found."}}"""))("external_urls")("spotify") }
+                }
+              ))
+            createdPlaylist : JsValue <- sc.createPlaylist(userId, PLAYLIST_NAME, PLAYLIST_DESC) 
+          } yield Ok(views.html.index(APP_TITLE, top100Spotify, createdPlaylist))
+        }
+      }
+      
+      
     }
   }
 }

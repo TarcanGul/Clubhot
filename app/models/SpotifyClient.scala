@@ -1,6 +1,6 @@
 package models
 
-import play.api.libs.json.JsValue
+import play.api.libs.json._
 import play.api.libs.ws._
 
 import javax.inject._
@@ -25,6 +25,7 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) exten
     .addQueryStringParameters("client_id" -> clientID)
     .addQueryStringParameters("response_type" -> "code")
     .addQueryStringParameters("redirect_uri" -> callbackURI)
+    .addQueryStringParameters("scope" -> "playlist-modify-private")
     .uri.toString()
 
   def setTokens(aToken: String, rToken: String) : Unit = {
@@ -57,18 +58,18 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) exten
       .addHttpHeaders("Authorization" -> s"Bearer ${accessToken}")
       .addHttpHeaders("Content-Type"-> "application/json")
 
-  def getUserInfo() : Future[String]  = {
+  def getUserInfo() : Future[JsValue]  = {
     val req : WSRequest = generateSpotifyRequest("/me")
     req.get().flatMap {
       r => {
         r.status match {
-          case 200 => Future.successful(r.body(readableAsString))
+          case 200 => Future.successful(r.body(readableAsJson))
           case 401 => {
             getNewAccessToken().flatMap {
               newToken => getUserInfo()
             }
           }
-          case _ => Future.successful(r.body)
+          case _ => Future.successful(r.body(readableAsJson))
         }
       }
     }
@@ -91,7 +92,7 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) exten
     }
   }
 
-  def searchTrack(query: String) : Future[JsValue] = {
+  def searchTrack(query: String) : Future[Option[JsValue]] = {
     val req : WSRequest = generateSpotifyRequest("/search")
       .addQueryStringParameters("query" -> query)
       .addQueryStringParameters("type" -> "track")
@@ -100,16 +101,40 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) exten
     req.get().flatMap {
       r => {
         r.status match {
-          case 200 => Future.successful((r.body(readableAsJson)))
+          case 200 => Future.successful((r.body(readableAsJson) \ "tracks" \ "items").as[List[JsValue]].headOption)
           case 401 => {
             getNewAccessToken().flatMap {
               newToken => searchTrack(query)
             }
           }
-          case _ => Future.successful(r.body(readableAsJson))
+          case _ => Future.failed(throw new Exception(r.body(readableAsString)))
         }
       }
     }
   }
+
+  def createPlaylist(userId : String, playlistName: String, description: String): Future[JsValue] = {
+    val req : WSRequest = generateSpotifyRequest(s"/users/${userId}/playlists")
+
+    val body = Json.obj(
+      ("name" -> playlistName),
+      ("description" -> description),
+      ("public" -> false)
+    )
+
+    req.post(body).flatMap {
+      r => {
+        r.status match {
+          case 201 => Future.successful((r.body(readableAsJson)))
+          case 401 => {
+            getNewAccessToken().flatMap {
+              newToken => createPlaylist(userId, playlistName, description)
+            }
+          }
+          case _ => Future.successful((r.body(readableAsJson)))
+        }
+      }
+    }
+  } 
 }
 

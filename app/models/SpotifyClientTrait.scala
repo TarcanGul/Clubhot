@@ -20,9 +20,14 @@ trait SpotifyClientTrait {
 
   def getToken(code: String) : Future[WSResponse]
 
-  def getUserInfo() : Future[String]
+  def getUserInfo() : Future[JsValue]
 
   def getCurrentPlaylists() : Future[JsValue]
 
-  def searchTrack(query: String) : Future[JsValue]
+  def searchTrack(query: String) : Future[Option[JsValue]]
+
+  def createPlaylist(userId: String, playlistName: String, description: String) : Future[JsValue]
+
+  //String of URI's.
+  //def addTracksToPlaylist(tracks: List[String]) : Future[JsValue]
 }

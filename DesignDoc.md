@@ -16,4 +16,10 @@ Decided to seperate token and spotify service.
 
 Goals:
 - Use scala best practices to make a fast responsive web app using scala play. 
+
+Some design questions: 
+TODO: Right now the searchTrack is called with blocking in MainController. Maybe we can split the list into groups (start with 10-10) and do blocking between them.
+
+TODO: get uri's of top 100 songs, return as uri list.
+TODO: Add the songs to uri lists.
     
