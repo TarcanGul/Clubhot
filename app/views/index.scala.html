@@ -1,5 +1,6 @@
 @import play.api.libs.json.JsValue
-@(title: String, top100: List[JsValue], createdPlaylist: JsValue) 
+@import models.structures._
+@(title: String, features: List[JsValue], tracks: List[SpotifyTrackResult]) 
 
 @main("Clubhot") {
   <html>
@@ -10,16 +11,14 @@
     </head>
     <body>
         <!-- Add a container and a row, then add a section and button inside the row -->
-      <div class="container">
-        <div class="row">
-          <section class="col-md-12 main-section">
-            <ol type="1">
-            @for(value <- top100) {
-              <li>@value</li>
+      <div class="track-container">
+            @for((track, feature) <- tracks zip features) {
+              <div class="track">
+                <div class="track-title">@track.name</div> 
+                <div class="track-artists">@track.artists.mkString(", ")</div>
+                @feature
+              </div>
             }
-          </ol>
-          Created playlist: @createdPlaylist
-          </section>
           <button class="btn btn-primary col-md-12" id="playlist">Click me!</button>
         </div>
       </div>

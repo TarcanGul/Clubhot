@@ -136,5 +136,68 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) exten
       }
     }
   } 
+
+  def addTracksToPlaylist(tracks: List[String], playlistID: String): Future[JsValue] = {
+    val req : WSRequest = generateSpotifyRequest(s"/playlists/${playlistID}/tracks")
+
+    val body = Json.obj(
+      ("uris" -> Json.toJson(tracks))
+    )
+
+    req.post(body).flatMap {
+      r => {
+        r.status match {
+          case 201 => Future.successful((r.body(readableAsJson)))
+          case 401 => {
+            getNewAccessToken().flatMap {
+              newToken => addTracksToPlaylist(tracks, playlistID)
+            }
+          }
+          case _ => Future.successful((r.body(readableAsJson)))
+        }
+      }
+    }
+  }
+
+  def updatePlaylist(tracks: List[String], playlistID: String): Future[JsValue] = {
+    val req : WSRequest = generateSpotifyRequest(s"/playlists/${playlistID}/tracks")
+
+    val body = Json.obj(
+      ("uris" -> Json.toJson(tracks))
+    )
+
+    req.put(body).flatMap {
+      r => {
+        r.status match {
+          case 200 => Future.successful((r.body(readableAsJson)))
+          case 401 => {
+            getNewAccessToken().flatMap {
+              newToken => updatePlaylist(tracks, playlistID)
+            }
+          }
+          case _ => Future.successful((r.body(readableAsJson)))
+        }
+      }
+    }
+  }
+
+  def getAudioFeatures(tracks: List[String]): Future[JsValue] = {
+    val req : WSRequest = generateSpotifyRequest("/audio-features")
+      .addQueryStringParameters("ids" -> tracks.mkString(","))
+
+    req.get().flatMap {
+      r => {
+        r.status match {
+          case 200 => Future.successful((r.body(readableAsJson)))
+          case 401 => {
+            getNewAccessToken().flatMap {
+              newToken => getAudioFeatures(tracks)
+            }
+          }
+          case _ => Future.successful((r.body(readableAsJson)))
+        }
+      }
+    }
+  }
 }
 

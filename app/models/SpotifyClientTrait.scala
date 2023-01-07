@@ -28,6 +28,11 @@ trait SpotifyClientTrait {
 
   def createPlaylist(userId: String, playlistName: String, description: String) : Future[JsValue]
 
+  def updatePlaylist(tracks: List[String], playlistID: String) : Future[JsValue]
+
   //String of URI's.
-  //def addTracksToPlaylist(tracks: List[String]) : Future[JsValue]
+  def addTracksToPlaylist(tracks: List[String], playlistID: String) : Future[JsValue]
+
+  //String of track ids.
+  def getAudioFeatures(tracks: List[String]) : Future[JsValue]
 }

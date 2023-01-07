@@ -9,6 +9,7 @@ import play.api.libs.json._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 import models.SpotifyClientTrait
+import models.structures._
 import scala.concurrent.blocking
 
 /**
@@ -30,6 +31,7 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, v
   val RATE_LIMIT = 10
   val PLAYLIST_NAME = "Beatport Top 100!"
   val PLAYLIST_DESC = "Automatically updated playlist."
+  val PLAYLIST_ID = "3ELv6AKPfb836HREVat4fX"
 
   def index() = Action.async { implicit request: Request[AnyContent] =>
     val spotifyAccessToken = request.session.get("access_token")
@@ -47,18 +49,23 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, v
           println(userId)
           for {
             top100 : List[(String, String)] <- bc.getTop100()
-            top100Spotify : List[JsValue] <- Future.sequence(top100.map 
+            top100Spotify : List[SpotifyTrackResult] <- Future.sequence(top100.map 
               (track =>
                 blocking {
-                  sc.searchTrack(s"\"${track._1}\" \"${track._2}\"").map{optionValue => optionValue.getOrElse(Json.parse("""{"external_urls" : { "spotify" : "No song found."}}"""))("external_urls")("spotify") }
+                  sc.searchTrack(s"\"${track._1}\" \"${track._2}\"").map {
+                    optionValue => new SpotifyTrackResult (optionValue.getOrElse(Json.parse("""{"uri" : "No song found."}"""))("uri").as[String], 
+                      optionValue.getOrElse(Json.parse("""{"id" : "No song found."}"""))("id").as[String],
+                      optionValue.getOrElse(Json.parse("""{"name" : "No song found."}"""))("name").as[String],
+                      optionValue.getOrElse(Json.parse(""" { "artists" : [] }"""))("artists").as[List[JsValue]].map(value => value("name").as[String]))
+                    }
                 }
               ))
-            createdPlaylist : JsValue <- sc.createPlaylist(userId, PLAYLIST_NAME, PLAYLIST_DESC) 
-          } yield Ok(views.html.index(APP_TITLE, top100Spotify, createdPlaylist))
+            audioFeatures : JsValue <- sc.getAudioFeatures(top100Spotify.map(trackResult => trackResult.id))
+            updatingPlaylist: JsValue <- sc.updatePlaylist(top100Spotify.map(trackResult => trackResult.uri), PLAYLIST_ID)
+          } yield Ok(views.html.index(APP_TITLE, 
+          features = audioFeatures("audio_features").as[List[JsValue]], tracks = top100Spotify))
         }
-      }
-      
-      
+      } 
     }
   }
 }
