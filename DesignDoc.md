@@ -21,4 +21,5 @@ Some design questions:
 TODO: Right now the searchTrack is called with blocking in MainController. Maybe we can split the list into groups (start with 10-10) and do blocking between them.
 
 TODO: Might need structure for features work. Use circe.
+TODO: Needs good error handling, if json returns empty or null.
     

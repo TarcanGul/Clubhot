@@ -53,10 +53,13 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, v
               (track =>
                 blocking {
                   sc.searchTrack(s"\"${track._1}\" \"${track._2}\"").map {
-                    optionValue => new SpotifyTrackResult (optionValue.getOrElse(Json.parse("""{"uri" : "No song found."}"""))("uri").as[String], 
+                    optionValue => {
+                      Thread.sleep(500) //For escaping the api limit
+                        new SpotifyTrackResult (optionValue.getOrElse(Json.parse("""{"uri" : "No song found."}"""))("uri").as[String], 
                       optionValue.getOrElse(Json.parse("""{"id" : "No song found."}"""))("id").as[String],
                       optionValue.getOrElse(Json.parse("""{"name" : "No song found."}"""))("name").as[String],
                       optionValue.getOrElse(Json.parse(""" { "artists" : [] }"""))("artists").as[List[JsValue]].map(value => value("name").as[String]))
+                    }
                     }
                 }
               ))
