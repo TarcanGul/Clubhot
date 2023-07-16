@@ -198,7 +198,7 @@
         "platform": {
             "name": "jvm",
             "config": {
-                "home": "/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home",
+                "home": "/Users/tarcangul/.sdkman/candidates/java/11.0.19-zulu/zulu-11.jdk/Contents/Home",
                 "options": [
                     "-Duser.dir=/Users/tarcangul/projects/clubhot/project/project"
                 ]
