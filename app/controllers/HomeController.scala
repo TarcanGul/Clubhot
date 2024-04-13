@@ -63,10 +63,10 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, v
                     }
                 }
               ))
-            audioFeatures : JsValue <- sc.getAudioFeatures(top100Spotify.map(trackResult => trackResult.id))
-            updatingPlaylist: JsValue <- sc.updatePlaylist(top100Spotify.map(trackResult => trackResult.uri), PLAYLIST_ID)
+            audioFeatures : List[JsValue] <- sc.getAudioFeatures(top100Spotify.map(trackResult => trackResult.id))
+            // updatingPlaylist: JsValue <- sc.updatePlaylist(top100Spotify.map(trackResult => trackResult.uri), PLAYLIST_ID)
           } yield Ok(views.html.index(APP_TITLE, 
-          features = audioFeatures("audio_features").as[List[JsValue]], tracks = top100Spotify))
+          features = audioFeatures, tracks = top100Spotify))
         }
       } 
     }

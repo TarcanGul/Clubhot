@@ -1,6 +1,6 @@
 @import play.api.libs.json.JsValue
 @import models.structures._
-@(title: String, features: List[JsValue], tracks: List[SpotifyTrackResult]) 
+@(title: String, features: List[JsValue], tracks: List[SpotifyTrackResult])
 
 @main("Clubhot") {
   <html>
@@ -16,7 +16,11 @@
               <div class="track">
                 <div class="track-title">@track.name</div> 
                 <div class="track-artists">@track.artists.mkString(", ")</div>
-                @feature
+                  <ul>
+                      @for(individual_feature <- feature) {
+                      <li>individual_feature</li>
+                      }
+                  </ul>
               </div>
             }
         </div>

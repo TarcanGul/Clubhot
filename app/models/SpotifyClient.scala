@@ -4,21 +4,26 @@ import play.api.libs.json._
 import play.api.libs.ws._
 
 import javax.inject._
-import play.api.mvc.Cookies
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
 import com.typesafe.config.ConfigFactory
+
+import java.net.InetAddress
 import java.util.Base64
+import java.util.concurrent.TimeUnit
+import scala.collection.mutable.ListBuffer
+import scala.concurrent.duration.Duration
 
 class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) extends SpotifyClientTrait {
   val clientID = ConfigFactory.load().getString("spotify.api.clientid")
   val clientSecret = ConfigFactory.load().getString("spotify.api.secret")
   val baseURI = "https://api.spotify.com/v1"
   val accountURI = "https://accounts.spotify.com"
-  val callbackURI = "http://localhost:9000/oauth2/callback"
+  val callbackURI =  "http://localhost:9000/oauth2/callback"
 
   var accessToken: String = ""
   var refreshToken: String = ""
+
 
   val authenticateURL: String = 
     ws.url(accountURI + "/authorize")
@@ -107,6 +112,14 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) exten
               newToken => searchTrack(query)
             }
           }
+          case 429 => {
+            println("Hit 429 from searchTrack, waiting to call again in 1 second.")
+            val callFuture = Future {
+              return searchTrack(query);
+            }
+
+            Await.result(callFuture, Duration.apply(1, TimeUnit.SECONDS))
+          }
           case _ => Future.failed(throw new Exception(r.body(readableAsString)))
         }
       }
@@ -181,20 +194,51 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) exten
     }
   }
 
-  def getAudioFeatures(tracks: List[String]): Future[JsValue] = {
+  def getAudioFeatures(tracks: List[String]): Future[List[JsValue]] = {
     val req : WSRequest = generateSpotifyRequest("/audio-features")
       .addQueryStringParameters("ids" -> tracks.mkString(","))
+
+    // analysis_url
+    val wantedValues = Set(
+      "danceability",
+      "energy",
+      "instrumentalness",
+      "liveness",
+      "loudness",
+      "speechiness",
+      "valence"
+    )
 
     req.get().flatMap {
       r => {
         r.status match {
-          case 200 => Future.successful((r.body(readableAsJson)))
+          case 200 => {
+            val allTrackFeaturesMap = (r.body(readableAsJson) \ "audio_features")
+              .get
+              .as[List[JsValue]] // The result is an array of 100 audio features
+
+            val filteredFeatures = allTrackFeaturesMap
+              .map(jsValue => jsValue.as[JsObject])
+              .map(jsObject => JsObject(jsObject.fields.filter {
+                case (key, _) => wantedValues.contains(key)
+              }))
+
+            Future.successful(filteredFeatures)
+          }
           case 401 => {
             getNewAccessToken().flatMap {
               newToken => getAudioFeatures(tracks)
             }
           }
-          case _ => Future.successful((r.body(readableAsJson)))
+          case 429 => {
+            println("Hit 429 from getAudioFeatures, waiting to call again in 1 second.")
+            val callFuture = Future {
+              return getAudioFeatures(tracks);
+            }
+
+            Await.result(callFuture, Duration.apply(1, TimeUnit.SECONDS))
+          }
+          case _ => Future.failed(new Exception())
         }
       }
     }

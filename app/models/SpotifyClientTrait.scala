@@ -34,5 +34,5 @@ trait SpotifyClientTrait {
   def addTracksToPlaylist(tracks: List[String], playlistID: String) : Future[JsValue]
 
   //String of track ids.
-  def getAudioFeatures(tracks: List[String]) : Future[JsValue]
+  def getAudioFeatures(tracks: List[String]) : Future[List[JsValue]]
 }

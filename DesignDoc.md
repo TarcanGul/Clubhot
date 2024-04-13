@@ -1,6 +1,7 @@
-#Features on clubhot:
+## Clubhot
 
-*Goal*: Get the features of Top 100 Beatport songs using spotify api and display in Web UI.
+Get the features of Top 100 Beatport songs using spotify api and display in Web UI!
+Also updates the Beatport Top 100 playlist automatically!
 
 Decided to seperate token and spotify service.
 
@@ -17,9 +18,7 @@ Decided to seperate token and spotify service.
 Goals:
 - Use scala best practices to make a fast responsive web app using scala play. 
 
-Some design questions: 
-TODO: Right now the searchTrack is called with blocking in MainController. Maybe we can split the list into groups (start with 10-10) and do blocking between them.
+Notes:
+- Runs with Java 11 because of Scala Play compatibility issues with Java 17.
 
-TODO: Might need structure for features work. Use circe.
-TODO: Needs good error handling, if json returns empty or null.
     
