@@ -31,7 +31,6 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, v
    */
 
   val APP_TITLE = "ClubHot"
-  // "3ELv6AKPfb836HREVat4fX"
   val maybePlaylistID : Option[String] = config.getOptional[String]("spotify.playlist")
 
   def index = Action.async { implicit request: Request[AnyContent] =>
