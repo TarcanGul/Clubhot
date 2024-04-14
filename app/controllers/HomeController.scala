@@ -51,7 +51,7 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, v
               bc.getTop100
             }
             top100Spotify : List[SpotifyTrackResult] <- {
-              var loadedTrackNumber = new AtomicInteger(0);
+              val loadedTrackNumber = new AtomicInteger(0);
               Future.sequence(
                 top100.map(track =>
                     sc.searchTrack(s"\"${track._1}\" \"${track._2}\"").map {
