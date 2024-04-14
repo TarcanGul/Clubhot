@@ -7,20 +7,21 @@ import javax.inject._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
 import com.typesafe.config.ConfigFactory
-import scala.collection.Seq
+import play.api.Configuration
 
+import scala.collection.Seq
 import java.net.InetAddress
 import java.util.Base64
 import java.util.concurrent.TimeUnit
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.Duration
 
-class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) extends SpotifyClientTrait {
-  val clientID = ConfigFactory.load().getString("spotify.api.clientid")
-  val clientSecret = ConfigFactory.load().getString("spotify.api.secret")
-  val baseURI = "https://api.spotify.com/v1"
-  val accountURI = "https://accounts.spotify.com"
-  val callbackURI =  "http://localhost:9000/oauth2/callback"
+class SpotifyClient @Inject()(ws: WSClient, config: Configuration)(implicit ec: ExecutionContext) extends SpotifyClientTrait {
+  private val clientID = ConfigFactory.load().getString("spotify.api.clientid")
+  private val clientSecret = ConfigFactory.load().getString("spotify.api.secret")
+  private val baseURI = "https://api.spotify.com/v1"
+  private val accountURI = "https://accounts.spotify.com"
+  private val callbackURI = ConfigFactory.load().getString("spotify.api.callback")
 
   var accessToken: String = ""
   var refreshToken: String = ""
@@ -177,6 +178,8 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) exten
   def updatePlaylist(tracks: List[String], playlistID: String): Future[JsValue] = {
     val req : WSRequest = generateSpotifyRequest(s"/playlists/${playlistID}/tracks")
 
+    println("Updating playlist " + playlistID)
+
     val body = Json.obj(
       ("uris" -> Json.toJson(tracks))
     )
@@ -200,6 +203,7 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) exten
     val req : WSRequest = generateSpotifyRequest("/audio-features")
       .addQueryStringParameters("ids" -> tracks.mkString(","))
 
+    println("Getting all the features of the tracks...")
     // analysis_url
     val wantedValues = Set(
       "danceability",

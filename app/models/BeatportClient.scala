@@ -15,7 +15,7 @@ import javax.inject._
 
 class BeatportClient @Inject()(implicit ec: ExecutionContext) extends BeatportClientTrait {
 
-  val browser = JsoupBrowser()
+  private val browser = JsoupBrowser()
 
   override def getTop100() : Future[List[(String, String)]] = {
     val page = browser.get("https://www.beatport.com/top-100")
