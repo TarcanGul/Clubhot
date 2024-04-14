@@ -1,6 +1,7 @@
 @import play.api.libs.json.JsValue
+@import scala.collection.Seq
 @import models.structures._
-@(title: String, features: List[JsValue], tracks: List[SpotifyTrackResult])
+@(title: String, features: List[Seq[(String, JsValue)]], tracks: List[SpotifyTrackResult])
 
 @main("Clubhot") {
   <html>
@@ -12,19 +13,25 @@
     <body>
         <!-- Add a container and a row, then add a section and button inside the row -->
       <div class="track-container">
-            @for((track, feature) <- tracks zip features) {
-              <div class="track">
-                <div class="track-title">@track.name</div> 
-                <div class="track-artists">@track.artists.mkString(", ")</div>
-                  <ul>
-                      @for(individual_feature <- feature) {
-                      <li>individual_feature</li>
-                      }
-                  </ul>
-              </div>
+            @for(((track, feature), index) <- tracks.zip(features).zipWithIndex) {
+            <div class="track">
+                <section class="track-info">
+                    <div class="track-rank">@(index+1)</div>
+                    <div class="track-title">@track.name</div>
+                    <div class="track-artists">@track.artists.mkString(", ")</div>
+                </section>
+                  <br />
+                <section class="track-features">
+                    <ul>
+                        @for(individual_feature <- feature) {
+                        <li><span class="feature">@individual_feature._1</span>: <span class="feature-value">@individual_feature._2</span></li>
+                        }
+                    </ul>
+                </section>
+
+            </div>
             }
-        </div>
-      </div>
+    </div>
     </body>
   </html>
 }

@@ -8,6 +8,8 @@ import javax.crypto.Cipher
 import scala.concurrent.Future
 import com.google.inject.ImplementedBy
 
+import scala.collection.Seq
+
 @ImplementedBy(classOf[SpotifyClient])
 trait SpotifyClientTrait {
 
@@ -34,5 +36,5 @@ trait SpotifyClientTrait {
   def addTracksToPlaylist(tracks: List[String], playlistID: String) : Future[JsValue]
 
   //String of track ids.
-  def getAudioFeatures(tracks: List[String]) : Future[List[JsValue]]
+  def getAudioFeatures(tracks: List[String]) : Future[List[Seq[(String, JsValue)]]]
 }

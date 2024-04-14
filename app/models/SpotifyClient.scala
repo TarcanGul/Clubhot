@@ -7,6 +7,7 @@ import javax.inject._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
 import com.typesafe.config.ConfigFactory
+import scala.collection.Seq
 
 import java.net.InetAddress
 import java.util.Base64
@@ -53,6 +54,7 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) exten
       r => {
         r.status match {
           case 200 => (r.json \ "access_token").as[String]
+          case _ => "Access token cannot be retrieved";
         }
       }
     }
@@ -194,7 +196,7 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) exten
     }
   }
 
-  def getAudioFeatures(tracks: List[String]): Future[List[JsValue]] = {
+  def getAudioFeatures(tracks: List[String]): Future[List[Seq[(String, JsValue)]]] = {
     val req : WSRequest = generateSpotifyRequest("/audio-features")
       .addQueryStringParameters("ids" -> tracks.mkString(","))
 
@@ -217,11 +219,12 @@ class SpotifyClient @Inject()(ws: WSClient)(implicit ec: ExecutionContext) exten
               .get
               .as[List[JsValue]] // The result is an array of 100 audio features
 
-            val filteredFeatures = allTrackFeaturesMap
+            val filteredFeatures : List[Seq[(String, JsValue)]] = allTrackFeaturesMap
               .map(jsValue => jsValue.as[JsObject])
               .map(jsObject => JsObject(jsObject.fields.filter {
                 case (key, _) => wantedValues.contains(key)
               }))
+              .map(jsObject => jsObject.fields)
 
             Future.successful(filteredFeatures)
           }

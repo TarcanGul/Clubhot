@@ -8,6 +8,7 @@ import play.api.libs.json._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
+import scala.collection.Seq
 import models.SpotifyClientTrait
 import models.structures._
 import scala.concurrent.blocking
@@ -40,7 +41,7 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, v
     if (spotifyAccessToken.isEmpty && spotifyRefToken.isEmpty) {
       Future.successful(Redirect(sc.authenticateURL))
     }
-    else {   
+    else {
       sc.setTokens(enc.decrypt(spotifyAccessToken.get), enc.decrypt(spotifyRefToken.get))
 
       sc.getUserInfo().flatMap {
@@ -63,7 +64,7 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, v
                     }
                 }
               ))
-            audioFeatures : List[JsValue] <- sc.getAudioFeatures(top100Spotify.map(trackResult => trackResult.id))
+            audioFeatures : List[scala.collection.Seq[(String, JsValue)]] <- sc.getAudioFeatures(top100Spotify.map(trackResult => trackResult.id))
             // updatingPlaylist: JsValue <- sc.updatePlaylist(top100Spotify.map(trackResult => trackResult.uri), PLAYLIST_ID)
           } yield Ok(views.html.index(APP_TITLE, 
           features = audioFeatures, tracks = top100Spotify))
