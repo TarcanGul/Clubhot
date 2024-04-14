@@ -34,7 +34,7 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, v
   // "3ELv6AKPfb836HREVat4fX"
   val maybePlaylistID : Option[String] = config.getOptional[String]("spotify.playlist")
 
-  def index() = Action.async { implicit request: Request[AnyContent] =>
+  def index = Action.async { implicit request: Request[AnyContent] =>
     val spotifyAccessToken = request.session.get("access_token")
     val spotifyRefToken = request.session.get("refresh_token")
 
@@ -44,7 +44,7 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents, v
     else {
       sc.setTokens(enc.decrypt(spotifyAccessToken.get), enc.decrypt(spotifyRefToken.get))
 
-      sc.getUserInfo().flatMap {
+      sc.getUserInfo.flatMap {
         _ => {
           for {
             top100 : List[(String, String)] <- {

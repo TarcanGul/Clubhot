@@ -8,12 +8,10 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
 import com.typesafe.config.ConfigFactory
 import play.api.Configuration
-
 import scala.collection.Seq
-import java.net.InetAddress
+
 import java.util.Base64
 import java.util.concurrent.TimeUnit
-import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.Duration
 
 class SpotifyClient @Inject()(ws: WSClient, config: Configuration)(implicit ec: ExecutionContext) extends SpotifyClientTrait {
@@ -83,7 +81,7 @@ class SpotifyClient @Inject()(ws: WSClient, config: Configuration)(implicit ec: 
     }
     }
 
-  def getCurrentPlaylists() : Future[JsValue] = {
+  def getCurrentPlaylists : Future[JsValue] = {
     val req : WSRequest = generateSpotifyRequest("/me/playlists")
     req.get().flatMap {
       r => {
@@ -91,7 +89,7 @@ class SpotifyClient @Inject()(ws: WSClient, config: Configuration)(implicit ec: 
           case 200 => Future.successful(r.body(readableAsJson))
           case 401 => {
             getNewAccessToken().flatMap {
-              newToken => getCurrentPlaylists()
+              newToken => getCurrentPlaylists
             }
           }
           case _ => Future.successful(r.body(readableAsJson))
